@@ -1,31 +1,43 @@
-name: Build Android APK
+name: Android CI
 
-on: [push]
+on:
+  push:
+    branches:
+      - main  # Change this to your default branch
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: Build Android App
+    runs-on: ubuntu-latest  # Uses an Ubuntu runner
+
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4  # Updated to v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v3  # Updated to v3
+        uses: actions/checkout@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          fetch-depth: 0  # Ensures the full repo is cloned
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3  # Updated to v3
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'  # Use Temurin JDK (from Adoptium)
+          java-version: '17'  # Change this to your project's Java version
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
 
       - name: Grant execute permission for Gradle
         run: chmod +x ./gradlew
+        working-directory: .  # Change this if your Gradle file is in a subdirectory
 
       - name: Build APK
         run: ./gradlew assembleDebug
+        working-directory: .  # Adjust this if needed
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4  # Fixed the issue by using v4
+        uses: actions/upload-artifact@v3
         with:
-          name: HandLandmarker-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: app-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk  # Change path if needed
